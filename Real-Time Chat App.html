@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang = "en">
+<head>
+    <title>Real-Time Chat App</title>
+    <style>
+        body { font-family: Arial; background:#f1f1f1; display:flex; justify-content:center; align-items:center; height:100vh; margin:0; }
+        .chat-container { width:400px; background:#fff; border-radius:8px; box-shadow:0 0 10px #ccc; display:flex; flex-direction:column; overflow:hidden; }
+        #messages { list-style:none; padding:10px; height:300px; overflow-y:auto; border-bottom:1px solid #ccc; flex:1; }
+        #chat-form { display:flex; }
+        #message-input { flex:1; padding:10px; border:none; font-size:16px; }
+        button { padding:10px; border:none; background:#28a745; color:white; font-size:16px; cursor:pointer; }
+        li { padding:5px 0; }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <ul id="messages"></ul>
+        <form id="chat-form">
+            <input id="message-input" autocomplete="off" placeholder="Type a message..." />
+            <button>Send</button>
+        </form>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        const form = document.getElementById('chat-form');
+        const input = document.getElementById('message-input');
+        const messages = document.getElementById('messages');
+
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            if(input.value){
+                socket.emit('chat message', input.value);
+                input.value = '';
+            }
+        });
+
+        socket.on('chat message', (msg) => {
+            const li = document.createElement('li');
+            li.textContent = msg;
+            messages.appendChild(li);
+            messages.scrollTop = messages.scrollHeight;
+        });
+    </script>
+</body>
+</html>
+    `);
+});
