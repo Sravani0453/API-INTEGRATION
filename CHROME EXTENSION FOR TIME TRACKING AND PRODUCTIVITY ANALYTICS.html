@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Simple Time Tracker</title>
+<style>
+  body { font-family: Arial; padding: 20px; max-width: 600px; }
+  h2 { margin-bottom: 10px; }
+  table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+  th, td { border: 1px solid #ccc; padding: 6px; text-align: left; }
+  input, button { margin-top: 5px; padding: 6px; width: 100%; }
+</style>
+</head>
+<body>
+<h2>Simple Time Tracker</h2>
+
+<label>Enter current website domain (e.g., github.com):</label>
+<input id="siteInput" placeholder="example.com">
+<button id="startBtn">Start Tracking</button>
+<button id="stopBtn">Stop Tracking</button>
+
+<h3>Analytics</h3>
+<label>Productive domains (comma separated):</label>
+<input id="productiveInput" value="github.com,stackoverflow.com,leetcode.com">
+<label>Unproductive domains (comma separated):</label>
+<input id="unproductiveInput" value="facebook.com,instagram.com,reddit.com">
+
+<table>
+<thead>
+<tr><th>Domain</th><th>Time Spent (minutes)</th><th>Status</th></tr>
+</thead>
+<tbody id="analyticsBody"></tbody>
+</table>
+
+<script>
+let timer = null;
+let currentDomain = null;
+let startTime = null;
+let sessions = {}; // { domain: timeInMs }
+
+function updateAnalytics() {
+  const productive = document.getElementById('productiveInput').value.split(',').map(s=>s.trim());
+  const unproductive = document.getElementById('unproductiveInput').value.split(',').map(s=>s.trim());
+  const tbody = document.getElementById('analyticsBody');
+  tbody.innerHTML = '';
+  for (let domain in sessions) {
+    let mins = Math.round(sessions[domain] / 60000);
+    let status = productive.includes(domain) ? 'Productive' : (unproductive.includes(domain) ? 'Unproductive' : 'Neutral');
+    let row = `<tr><td>${domain}</td><td>${mins}</td><td>${status}</td></tr>`;
+    tbody.innerHTML += row;
+  }
+}
+
+document.getElementById('startBtn').addEventListener('click', () => {
+  const site = document.getElementById('siteInput').value.trim();
+  if (!site) { alert('Enter a domain'); return; }
+  if (currentDomain) clearInterval(timer);
+
+  currentDomain = site;
+  startTime = Date.now();
+
+  timer = setInterval(() => {
+    let elapsed = Date.now() - startTime;
+    sessions[currentDomain] = (sessions[currentDomain] || 0) + elapsed;
+    startTime = Date.now();
+    updateAnalytics();
+  }, 1000);
+});
+
+document.getElementById('stopBtn').addEventListener('click', () => {
+  if (!currentDomain) return;
+  clearInterval(timer);
+  timer = null;
+  currentDomain = null;
+});
+</script>
+</body>
+</html>
