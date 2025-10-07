@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang = "en ">
+    <head>
+<title>Collaborative Editor</title>
+<script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
+<style>
+body { font-family: Arial; padding: 30px; background: #f9f9f9; }
+h2 { color: #333; }
+textarea { width:98%; height:300px; font-size:17px; border:1px solid #aaa; border-radius:6px; padding:8px; }
+#roomBlock { margin-bottom: 15px; }
+</style>
+</head>
+<body>
+<h2>Real-Time Collaborative Document Editor</h2>
+<div id="roomBlock">
+  <input id="room" placeholder="Enter Room ID" value="default-room" />
+  <button onclick="joinRoom()">Join Room</button>
+</div>
+<textarea id="editor" disabled placeholder="Type here after joining a room..."></textarea>
+<script>
+const socket = io();
+let roomId = "";
+function joinRoom() {
+  roomId = document.getElementById('room').value.trim();
+  if (!roomId) { alert("Enter a room ID"); return; }
+  socket.emit('joinRoom', roomId);
+  document.getElementById('editor').disabled = false;
+}
+const editor = document.getElementById('editor');
+socket.on('loadContent', c => editor.value = c);
+socket.on('updateContent', c => editor.value = c);
+editor.addEventListener('input', () => {
+  if(roomId) socket.emit('edit', { roomId, content: editor.value });
+});
+</script>
+</body></html>`);
+
